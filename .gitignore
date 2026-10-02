@@ -1,0 +1,21 @@
+# macOS
+.DS_Store
+
+# 비밀값 / 로컬 설정
+.env
+.env.*
+!.env.example
+.venv/
+venv/
+
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+
+# JavaScript
+node_modules/
+
+# 임시 파일
+*.log
+~$*
