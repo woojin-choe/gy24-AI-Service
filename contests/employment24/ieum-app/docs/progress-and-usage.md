@@ -48,17 +48,17 @@ npm ci
 cp .env.example .env
 ```
 
-`.env`를 열어 본인이 발급받은 기업마당 인증키를 `BIZINFO_API_KEY`에 입력합니다. 저장소에는 실제 키가 포함되어 있지 않습니다. 키 없이도 체험용 공고로 사용할 수 있습니다.
+팀 공용 기업마당 인증키가 `.env.example`에 포함되어 있습니다. 위 복사 명령을 실행하면 바로 실제 공고를 조회할 수 있습니다. 다른 키를 사용하려면 `.env`의 `BIZINFO_API_KEY`를 변경합니다. 키 없이도 체험용 공고로 사용할 수 있습니다.
 
 ```env
-BIZINFO_API_KEY=본인이_발급받은_인증키
+BIZINFO_API_KEY=복사된_팀공용_인증키
 LLM_API_URL=
 LLM_API_KEY=
 LLM_MODEL=
 PDF_FONT_PATH=/System/Library/Fonts/Supplemental/Arial Unicode.ttf
 ```
 
-`.env` 파일과 저장한 회사 정보는 Git에서 제외되어 있습니다. 팀 채팅이나 README에 인증키를 적지 않습니다.
+실제 `.env` 파일과 저장한 회사 정보는 Git에서 제외되어 있습니다. 사용자 요청에 따라 기업마당 팀 공용 키만 `.env.example`로 공유합니다. 개인 LLM 키는 이 파일에 추가하지 않습니다.
 
 ### 3. 한글 PDF 글꼴 확인
 
