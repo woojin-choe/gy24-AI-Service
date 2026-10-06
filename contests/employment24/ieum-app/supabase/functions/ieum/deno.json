@@ -1,0 +1,7 @@
+{
+  "imports": {
+    "@supabase/supabase-js": "npm:@supabase/supabase-js@2.117.2",
+    "pdf-lib": "npm:pdf-lib@1.17.1",
+    "@pdf-lib/fontkit": "npm:@pdf-lib/fontkit@1.1.1"
+  }
+}

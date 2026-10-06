@@ -1,6 +1,10 @@
-# 이음 — 로컬 고용지원 신청 준비 앱
+# 이음 — 고용지원 신청 준비 앱
 
-회사 정보를 기억하고, 기업마당의 인력 분야 공고를 조회한 뒤 필요한 정보를 대화로 받아 한글 PDF 신청 준비서를 만드는 로컬 프로토타입입니다.
+회사 정보를 기억하고, 기업마당 공고와 대화 내용을 한글 PDF 신청 준비서로 정리합니다. GitHub Pages에 화면을 배포하고 Supabase에서 인증·저장·서버 기능을 제공합니다.
+
+**[GitHub Pages + Supabase 배포 및 실행 안내](docs/github-pages-supabase.md)**
+
+아래 내용은 이전 로컬 프로토타입(`npm run dev:local`, `NEXT_PUBLIC_LOCAL_API=true`)의 동작과 제약을 설명합니다.
 
 [전체 구현 현황 및 팀원 사용법](docs/progress-and-usage.md) · [신청 양식 조사 기록](docs/application-forms.md)
 
@@ -11,8 +15,8 @@ Node.js 22.13 이상에서:
 ```bash
 npm ci
 cp .env.example .env
-# 팀 공용 기업마당 키가 포함된 설정 복사 완료
-npm run dev
+# .env에 NEXT_PUBLIC_LOCAL_API=true 설정
+npm run dev:local
 ```
 
 http://localhost:3001 에서 접속합니다. `.env` 변경 시 서버를 다시 실행합니다. 3001 포트를 사용 중이면 기존 앱을 종료하거나 `npm run dev -- --port 3002`로 다른 포트를 지정합니다.
@@ -54,7 +58,7 @@ macOS의 Arial Unicode TTF를 기본 사용합니다. 다른 환경에서는 `.e
 - 팀 공용 기업마당 API 키는 `.env.example`에 포함되어 있습니다. 실행 시 `.env`로 복사하며 브라우저 응답에는 포함하지 않습니다. LLM 키와 개인 설정은 `.env`에만 저장합니다.
 - 삭제 버튼으로 저장된 프로필을 비울 수 있습니다. 내려받은 PDF는 직접 관리합니다.
 - 여러 사용자가 접속하는 공개 서비스로 배포하려면 HTTPS·이메일 인증·비밀번호 재설정·운영용 데이터베이스·보관 정책·지속 작업·키 관리 등을 구현해야 합니다.
-- 로컬 API는 Vite 개발 서버 미들웨어로 제공합니다. `npm run build`는 UI 빌드 검증이며 `npm start`의 운영 API 제공은 지원하지 않습니다.
+- 로컬 API는 `dev:local` 전용입니다. 운영 빌드는 정적 `out/`을 생성하며 서버 기능은 Supabase Edge Function에서 제공합니다.
 
 ## 확인
 

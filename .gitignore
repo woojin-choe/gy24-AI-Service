@@ -19,3 +19,12 @@ node_modules/
 # 임시 파일
 *.log
 ~$*
+
+# App build output / local backend data
+.next/
+out/
+dist/
+.local/
+.wrangler/
+*.tsbuildinfo
+**/supabase/.temp/

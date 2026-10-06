@@ -1,0 +1,66 @@
+name: Deploy Ieum to GitHub Pages
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'contests/employment24/ieum-app/**'
+      - '.github/workflows/pages.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: github-pages
+  cancel-in-progress: false
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: contests/employment24/ieum-app
+    env:
+      NEXT_PUBLIC_BASE_PATH: /${{ github.event.repository.name }}
+      NEXT_PUBLIC_SUPABASE_URL: ${{ vars.SUPABASE_URL || 'https://qynhrrughunzqamhddim.supabase.co' }}
+      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${{ vars.SUPABASE_PUBLISHABLE_KEY || 'sb_publishable_syEXY4Z9JPTERvuN7KC_dQ_LYi9dOOB' }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: contests/employment24/ieum-app/package-lock.json
+      - name: Validate backend configuration
+        run: |
+          test -n "$NEXT_PUBLIC_SUPABASE_URL" || { echo 'Set repository variable SUPABASE_URL'; exit 1; }
+          test -n "$NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY" || { echo 'Set repository variable SUPABASE_PUBLISHABLE_KEY'; exit 1; }
+      - run: npm ci
+      - run: npm run typecheck
+      - name: Install Korean PDF test font
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y fonts-unfonts-core
+      - run: npm test
+        env:
+          PDF_FONT_PATH: /usr/share/fonts/truetype/unfonts-core/UnDotum.ttf
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+      - name: Check Edge Function
+        run: deno check --config supabase/functions/ieum/deno.json --node-modules-dir=none supabase/functions/ieum/index.ts
+      - run: npm run build
+      - run: touch out/.nojekyll
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: contests/employment24/ieum-app/out
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy
+        id: deployment
+        uses: actions/deploy-pages@v4

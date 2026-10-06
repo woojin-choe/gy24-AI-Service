@@ -1,0 +1,5 @@
+project_id = "ieum"
+
+# Public status/notices are allowed; protected routes validate tokens inside the function.
+[functions.ieum]
+verify_jwt = false

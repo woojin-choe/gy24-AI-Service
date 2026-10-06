@@ -1,5 +1,6 @@
 'use client';
 import { useState } from 'react';
+import { apiFetch } from './api';
 export type Account = { id: string; name: string; email: string };
 export default function AuthPanel({ onAuthenticated, initialMode = 'login' }: { onAuthenticated: (user: Account) => void; initialMode?: 'login' | 'signup' }) {
  const [signup, setSignup] = useState(initialMode === 'signup');
@@ -17,10 +18,11 @@ export default function AuthPanel({ onAuthenticated, initialMode = 'login' }: { 
   if (signup && password !== confirmPassword) { setError('비밀번호 확인이 일치하지 않습니다.'); return; }
   setBusy(true);
   try {
-   const response = await fetch(`/api/auth/${signup ? 'signup' : 'login'}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name, email, password, remember }) });
+   const response = await apiFetch(`/api/auth/${signup ? 'signup' : 'login'}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name, email, password, remember }) });
    const data = await response.json();
    if (!response.ok) throw new Error(data.error || '잠시 후 다시 시도해주세요.');
-   onAuthenticated(data.user);
+   if (data.user) onAuthenticated(data.user);
+   else setError('가입 확인 이메일을 보냈습니다. 이메일의 확인 링크를 연 뒤 로그인해주세요.');
   } catch (cause) { setError(cause instanceof Error ? cause.message : '연결하지 못했습니다.'); }
   finally { setBusy(false); }
  }
