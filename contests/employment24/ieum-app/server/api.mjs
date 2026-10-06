@@ -1,3 +1,5 @@
+import { randomUUID } from 'node:crypto';
+import { createAuth } from './auth.mjs';
 import { getGuide } from './guides.mjs';
 import { readFile, writeFile, mkdir, rename } from 'node:fs/promises';
 import path from 'node:path';
@@ -26,17 +28,26 @@ function profileOnly(input) {
 async function body(req) { let chunks='',n=0;for await(const chunk of req){n+=chunk.length;if(n>1000000)throw Error('입력 크기가 너무 큽니다.');chunks+=chunk;}return chunks?JSON.parse(chunks):{}; }
 const questions=['이번 신청에서 추진하려는 활동과 목표를 알려주세요.','참여 인원과 추진 일정을 알려주세요.','관련 증빙자료가 준비되어 있나요? 준비된 자료와 부족한 자료를 알려주세요.'];
 export function localApi(env, root) {
- const stateFile=path.join(root,'.local','profile.json');let notices=[];let lastFetched=null;let chatBusy=false;
+ const auth=createAuth(root);let notices=[];let lastFetched=null;let chatBusy=false;
  const json=(res,status,data)=>{res.writeHead(status,{'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store'});res.end(JSON.stringify(data));};
  return {name:'ieum-local-api',configureServer(server){server.middlewares.use(async(req,res,next)=>{
  const pathname=(req.url||'').split('?')[0];if(!pathname.startsWith('/api/'))return next();
  // Bound to loopback; reject cross-origin mutations, including localhost CSRF.
- const origin=req.headers.origin;if(origin && origin!==`http://${req.headers.host}`){return json(res,403,{error:'다른 사이트에서의 요청은 허용되지 않습니다.'});}
+ const origin=req.headers.origin;if(origin && origin!==`${req.socket.encrypted?'https':'http'}://${req.headers.host}`){return json(res,403,{error:'다른 사이트에서의 요청은 허용되지 않습니다.'});}
  try {
+ if(pathname==='/api/auth/me'&&req.method==='GET')return json(res,200,{user:await auth.current(req)});
+ if(pathname==='/api/auth/signup'&&req.method==='POST')return json(res,201,{user:await auth.signup(await body(req),req,res)});
+ if(pathname==='/api/auth/login'&&req.method==='POST')return json(res,200,{user:await auth.login(await body(req),req,res)});
+ if(pathname==='/api/auth/logout'&&req.method==='POST'){await auth.logout(req,res);return json(res,200,{signedOut:true});}
+ let stateFile;
+ if(['/api/profile','/api/chat','/api/pdf'].includes(pathname)){
+  const user=await auth.current(req);if(!user)return json(res,401,{error:'로그인이 필요합니다.'});
+  stateFile=path.join(root,'.local','users',user.id,'profile.json');
+ }
  if(pathname==='/api/status'&&req.method==='GET')return json(res,200,{live:!!env.BIZINFO_API_KEY,llm:!!(env.LLM_API_KEY&&env.LLM_API_URL&&env.LLM_MODEL),lastFetched});
  if(pathname==='/api/profile'&&req.method==='GET'){let profile={};try{profile=JSON.parse(await readFile(stateFile,'utf8'));}catch(e){if(e.code!=='ENOENT')throw e;}return json(res,200,{profile});}
- if(pathname==='/api/profile'&&req.method==='POST'){const {profile}=await body(req);await mkdir(path.dirname(stateFile),{recursive:true});await writeFile(stateFile+'.tmp',JSON.stringify(profileOnly(profile)),{mode:0o600});await rename(stateFile+'.tmp',stateFile);return json(res,200,{saved:true});}
- if(pathname==='/api/profile'&&req.method==='DELETE'){await mkdir(path.dirname(stateFile),{recursive:true});await writeFile(stateFile,'{}',{mode:0o600});return json(res,200,{deleted:true});}
+ if(pathname==='/api/profile'&&req.method==='POST'){const {profile}=await body(req);await mkdir(path.dirname(stateFile),{recursive:true,mode:0o700});const temporary=stateFile+'.'+randomUUID()+'.tmp';await writeFile(temporary,JSON.stringify(profileOnly(profile)),{mode:0o600});await rename(temporary,stateFile);return json(res,200,{saved:true});}
+ if(pathname==='/api/profile'&&req.method==='DELETE'){await mkdir(path.dirname(stateFile),{recursive:true,mode:0o700});await writeFile(stateFile,'{}',{mode:0o600});return json(res,200,{deleted:true});}
  if(pathname==='/api/notices'&&req.method==='GET'){
  const mode=new URL(req.url,'http://localhost').searchParams.get('mode');
  if(mode==='demo')return json(res,200,{notices:DEMO,mode:'demo'});
@@ -57,6 +68,6 @@ export function localApi(env, root) {
  }
  if(pathname==='/api/pdf'&&req.method==='POST'){const input=await body(req);const notice=[...notices,...DEMO].find(x=>x.id===input.noticeId);if(!notice)throw Error('공고를 먼저 조회해주세요.');if(!Array.isArray(input.messages)||input.messages.length>24)throw Error('대화 내용을 확인해주세요.');const pdf=await makePdf(profileOnly(input.profile),notice,input.messages.map(x=>({role:x.role,content:String(x.content).slice(0,4000)})),input.signed===true,env.PDF_FONT_PATH);res.writeHead(200,{'Content-Type':'application/pdf','Content-Disposition':'attachment; filename="ieum-application-preparation.pdf"','Cache-Control':'no-store'});return res.end(pdf);}
  return json(res,404,{error:'요청한 기능을 찾지 못했습니다.'});
- }catch(error){return json(res,400,{error:error.message||'요청을 처리하지 못했습니다.'});}
+ }catch(error){return json(res,error.status||400,{error:error.message||'요청을 처리하지 못했습니다.'});}
  });}};
 }
