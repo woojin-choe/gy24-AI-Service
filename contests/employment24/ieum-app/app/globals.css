@@ -64,3 +64,19 @@ header::after{content:'';position:absolute;right:0;top:0;width:85px;height:100%;
 /* Keep fields in the same grid row top-aligned when a conditional input appears. */
 .form-grid{align-items:start}
 .form-grid .employee-field{min-height:112px;align-content:start}
+.email-fields{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(130px,.9fr);gap:8px;align-items:center;min-width:0}
+.email-fields input,.email-fields select{padding:12px;width:100%;min-width:0;font-size:12px}
+.email-fields>span{color:#737b82}
+.form-grid .email-field{grid-column:span 2}
+@media(max-width:800px){.form-grid .email-field{grid-column:auto}}
+.email-fields{grid-template-columns:minmax(220px,1fr) 24px minmax(220px,1fr);width:100%}
+.form-grid .email-field{min-height:0;align-content:start;gap:9px;margin:0}
+.email-fields{margin:0;min-height:42px}
+.email-fields input,.email-fields select{height:42px;box-sizing:border-box}
+@media(max-width:800px){.email-fields{grid-template-columns:minmax(0,1fr) 18px minmax(0,1fr)}}
+.form-grid .employee-field{min-height:0}
+.form-grid label>input,.form-grid label>select{height:46px;min-height:46px;padding:12px 14px;font-size:13px;box-sizing:border-box}
+.email-fields input,.email-fields select{height:46px;min-height:46px;padding:12px 14px;font-size:13px;box-sizing:border-box}
+.email-domain-control{display:grid;gap:8px;min-width:0}
+.email-domain-control:has(input){grid-template-columns:minmax(0,1fr) minmax(135px,.85fr)}
+.email-domain-control:has(input){grid-template-columns:minmax(0,1fr)}
