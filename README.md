@@ -1,3 +1,5 @@
+![2026 고용24 국민참여 AI 고용서비스 발굴 온라인 해커톤](contests/employment24/assets/hackathon_banner.png)
+
 # gy24-AI-Service
 
 고용24 AI 고용서비스 해커톤과 기아 PBV 아이디어 공모전을 준비하는 팀 저장소입니다. 기획안, 조사 자료, 코드, 제출 자료를 함께 관리합니다.
