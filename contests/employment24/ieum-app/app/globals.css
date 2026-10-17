@@ -100,3 +100,5 @@ header::after{content:'';position:absolute;right:0;top:0;width:85px;height:100%;
 @media(max-width:800px){.assistant-favorites .favorite-item{flex-wrap:wrap}.assistant-favorites .favorite-item-actions{width:100%;justify-content:flex-end}}
 .favorite-button{width:24px;height:24px;font-size:18px}
 .favorite-button{width:20px;height:20px;font-size:15px}
+.check-row>b.warn{background:#f6e7d2;color:#8a5a1c}.needs-fix{display:block;font-style:normal;font-size:10px;color:#8a5a1c;margin-top:5px}.check-row small{display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden}
+h1,h2,h3,.notice-card h3,.hero h2{word-break:keep-all;overflow-wrap:anywhere}

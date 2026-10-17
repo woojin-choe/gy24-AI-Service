@@ -3,8 +3,8 @@ import { PDFDocument, rgb, PDFString } from 'pdf-lib';
 import fontkit from '@pdf-lib/fontkit';
 const C={green:rgb(.12,.30,.24),ink:rgb(.15,.20,.18),muted:rgb(.43,.49,.45),pale:rgb(.94,.96,.92),line:rgb(.84,.88,.83),amber:rgb(.61,.44,.19)};
 const text=v=>String(v??'').replace(/<[^>]*>/g,' ').replace(/&nbsp;/g,' ').replace(/&amp;/g,'&').replace(/[\u0000-\u0008\u000b-\u001f]/g,' ').trim();
-const questionLabels=['신청 목적 및 추진 내용','참여 인원 및 추진 일정','증빙자료 준비 현황'];
-export function reviewAnswers(messages){return messages.filter(x=>x.role==='user').map((m,i)=>{const value=text(m.content);const unconfirmed=!value||/아무렇게|대충|알아서|ㄴㄴ|없는데/.test(value)||(!/[가-힣]/.test(value)&&value.length<80);return {label:questionLabels[i]||`추가 답변 ${i+1}`,value,unconfirmed};});}
+export { reviewAnswers } from './answers.mjs';
+import { reviewAnswers, questionLabels } from './answers.mjs';
 export async function makePdf(profile,notice,messages,signed,fontBytes){
  const pdf=await PDFDocument.create();pdf.registerFontkit(fontkit);let font;try{font=await pdf.embedFont(fontBytes,{subset:true});}catch{throw Error('한글 PDF 글꼴을 찾을 수 없습니다. PDF_FONT_URL을 확인해주세요.');}
  const date=new Date().toLocaleDateString('ko-KR',{timeZone:'Asia/Seoul'});let page,y;const W=595,H=842,M=44,usable=507;
